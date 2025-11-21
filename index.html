@@ -3,1166 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySQL Subquery Practice Guide</title>
+    <title>SQL Practice Questions - Solved Subqueries</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow: hidden;
-            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            /* Prevent body scroll for horizontal slideshow transition */
+            overflow: hidden; 
+            background-color: #f7f9fc;
         }
-
-        .container {
-            width: 100%;
-            height: 100vh;
+        /* Custom class for the horizontal page container */
+        .page-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .slides-wrapper {
-            width: 85%;
-            height: 85vh;
-            overflow: hidden;
-            position: relative;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .slides-container {
-            display: flex;
+            width: fit-content; 
             transition: transform 0.5s ease-in-out;
-            height: 100%;
         }
-
-        .slide {
-            min-width: 100%;
-            height: 100%;
-            background: white;
-            padding: 40px 60px;
-            overflow-y: auto;
+        /* Style for individual pages */
+        .page {
+            flex: none;
+            width: 100vw;
+            height: 100vh;
+            padding: 4rem 10vw;
             display: flex;
             flex-direction: column;
+            align-items: flex-start;
+            /* Enable vertical scroll for content that overflows the 100vh height */
+            overflow-y: auto; 
+            box-sizing: border-box; 
         }
-
-        .slide h1 {
-            color: #667eea;
-            font-size: 2.2em;
-            margin-bottom: 25px;
-            border-bottom: 4px solid #667eea;
-            padding-bottom: 12px;
-        }
-
-        .slide h2 {
-            color: #764ba2;
-            font-size: 1.6em;
-            margin-top: 25px;
-            margin-bottom: 12px;
-        }
-
-        .slide h3 {
-            color: #555;
-            font-size: 1.3em;
-            margin-top: 18px;
-            margin-bottom: 10px;
-        }
-
-        .sql-code {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 30px;
-            border-radius: 10px;
-            margin: 18px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 1.15em;
-            overflow-x: auto;
-            white-space: pre;
-            line-height: 1.9;
-            min-height: 150px;
-            max-height: 400px;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .code-wrapper {
-            position: relative;
-            margin: 18px 0;
-        }
-
-        .copy-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: all 0.3s;
-            z-index: 5;
+        
+        /* Two-Column Layout for Query/Result sections */
+        .two-column-layout {
             display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-
-        .copy-button:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .copy-button:active {
-            transform: translateY(0);
-        }
-
-        .copy-button.copied {
-            background: #28a745;
-        }
-
-        .question-box {
-            background: #fff3cd;
-            padding: 22px;
-            border-left: 5px solid #ffc107;
-            margin: 18px 0;
-            border-radius: 5px;
-            font-size: 1.15em;
-            font-weight: 500;
-        }
-
-        .solution-box {
-            background: #d4edda;
-            padding: 22px;
-            border-left: 5px solid #28a745;
-            margin: 18px 0;
-            border-radius: 5px;
-        }
-
-        .output-box {
-            background: #f0f4ff;
-            padding: 22px;
-            border-left: 4px solid #667eea;
-            margin: 18px 0;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-
-        .result-table {
+            gap: 3rem; /* Spacing between columns */
             width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-size: 1em;
+            margin-top: 1rem;
+            align-items: flex-start; 
         }
 
-        .result-table th {
-            background: #667eea;
-            color: white;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            border: 1px solid #5568d3;
+        .main-content {
+            /* Takes 65% of the space for tables/explanations (Left Column) */
+            flex: 3; 
+            min-width: 0; 
         }
-
-        .result-table td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            color: #333;
+        
+        .aside-content {
+            /* Takes 35% of the space for the code block (Right Column) */
+            flex: 1.5; 
+            min-width: 300px; 
+            max-width: 400px; 
+            position: sticky; /* Keeps the code block pinned while scrolling main content */
+            top: 4rem; /* Offset from the top of the viewport */
+            align-self: flex-start; 
         }
-
-        .result-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-
-        .result-table tr:hover {
-            background: #e7f0ff;
-        }
-
-        .nav-button {
-            position: absolute;
+        
+        /* Navigation Button Style */
+        .nav-btn {
+            position: fixed;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.9);
+            z-index: 10;
+            padding: 1.5rem 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: white;
+            transition: background-color 0.3s, opacity 0.3s;
+            cursor: pointer;
             border: none;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 10;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            outline: none;
         }
-
-        .nav-button:hover {
-            background: white;
-            transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        .nav-btn:hover:not(:disabled) {
+            background-color: rgba(0, 0, 0, 0.4);
         }
-
-        .nav-button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
+        .nav-btn:disabled {
+            opacity: 0;
+            cursor: default;
         }
-
-        .prev-button {
-            left: 20px;
+        #prev-btn {
+            left: 0;
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
         }
-
-        .next-button {
-            right: 20px;
+        #next-btn {
+            right: 0;
+            border-top-left-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
         }
-
-        .progress-indicator {
+        /* Custom table styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .data-table th {
+            background-color: #e0f2f1;
+            font-weight: 600;
+        }
+        /* Code Block Styling */
+        .code-container {
+            position: relative;
+            background-color: #2d3748; /* Dark background for code */
+            color: #f7fafc;
+            padding: 1.5rem; /* Increased padding */
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            width: 100%; /* Take full width of its column */
+            min-height: 150px; 
+            overflow-x: auto; /* Enable horizontal scroll for long lines */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .code-container code {
+            font-family: monospace;
+            white-space: pre; /* Essential for preventing long lines from wrapping */
+            display: block;
+            font-size: 0.9rem; /* Slightly smaller font for more lines */
+            line-height: 1.4;
+        }
+        .copy-btn {
             position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-
-        .progress-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background-color: #48bb78; /* Green button */
+            color: white;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #38a169;
         }
 
-        .progress-dot.active {
-            background: white;
-            transform: scale(1.3);
+        /* Specific styles for definition lists */
+        .definition-list dt {
+            font-weight: 700;
+            color: #16a3b3;
+            margin-top: 0.5rem;
         }
-
-        ul {
-            margin: 15px 0;
-            padding-left: 30px;
-            line-height: 1.8;
+        .definition-list dd {
+            margin-left: 1.5rem;
+            color: #4b5563;
         }
-
-        li {
-            margin: 8px 0;
+        .step-explanation {
+            background-color: #f0f9ff;
+            padding: 1rem;
+            border-left: 4px solid #38bdf8;
+            margin-top: 1rem;
+            width: 100%;
+        }
+        .note {
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="slides-wrapper">
-            <div class="slides-container" id="slidesContainer">
-                
-                <!-- Slide 1: Database Schema -->
-                <div class="slide">
-                    <h1>MySQL Subquery Practice Guide</h1>
-                    <h2>Database Schema</h2>
-                    
-                    <h3>Create Tables:</h3>
-                    <div class="code-wrapper">
-                        <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                        <div class="sql-code">-- Employees Table
-CREATE TABLE employees (
-    employee_id INT PRIMARY KEY,
-    name VARCHAR(100),
-    department_id INT,
-    salary DECIMAL(10,2),
-    hire_date DATE,
-    manager_id INT
-);
 
--- Departments Table
-CREATE TABLE departments (
-    department_id INT PRIMARY KEY,
-    department_name VARCHAR(100),
-    location VARCHAR(100)
-);
+    <div id="content-wrapper" class="page-container">
 
--- Orders Table
-CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    customer_id INT,
-    order_date DATE,
-    total_amount DECIMAL(10,2)
-);
-
--- Customers Table
-CREATE TABLE customers (
-    customer_id INT PRIMARY KEY,
-    customer_name VARCHAR(100),
-    city VARCHAR(100)
-);</div>
-                    </div>
-                </div>
-
-                <!-- Slide 2: Sample Data - Departments & Employees -->
-                <div class="slide">
-                    <h1>Sample Data - Part 1</h1>
-                    
-                    <h2>Insert Departments:</h2>
-                    <div class="code-wrapper">
-                        <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                        <div class="sql-code">INSERT INTO departments (department_id, department_name, location) VALUES
-(1, 'Sales', 'New York'),
-(2, 'Engineering', 'San Francisco'),
-(3, 'Marketing', 'New York'),
-(4, 'HR', 'Chicago'),
-(5, 'Finance', 'London'),
-(6, 'IT', 'San Francisco');</div>
-                    </div>
-
-                    <h2>Insert Employees:</h2>
-                    <div class="code-wrapper">
-                        <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                        <div class="sql-code">INSERT INTO employees (employee_id, name, department_id, salary, hire_date, manager_id) VALUES
-(1, 'John Smith', 1, 85000.00, '2020-01-15', NULL),
-(2, 'Sarah Johnson', 2, 95000.00, '2019-03-20', NULL),
-(3, 'Mike Wilson', 1, 62000.00, '2021-06-10', 1),
-(4, 'Emily Brown', 2, 88000.00, '2020-09-05', 2),
-(5, 'David Lee', 3, 70000.00, '2021-02-14', NULL),
-(6, 'Lisa Anderson', 1, 58000.00, '2022-01-20', 1),
-(7, 'James Taylor', 2, 92000.00, '2019-11-30', 2),
-(8, 'Mary Martinez', 4, 65000.00, '2020-07-18', NULL),
-(9, 'Robert Garcia', 5, 78000.00, '2021-04-25', NULL),
-(10, 'Jennifer Davis', 3, 72000.00, '2020-12-08', 5),
-(11, 'William Rodriguez', 2, 97000.00, '2018-05-12', 2),
-(12, 'Patricia Hernandez', 1, 55000.00, '2022-03-15', 1),
-(13, 'Christopher Lopez', 6, 82000.00, '2020-08-22', NULL),
-(14, 'Linda Gonzalez', 4, 68000.00, '2021-09-10', 8),
-(15, 'Daniel Wilson', 5, 75000.00, '2019-06-30', 9);</div>
-                    </div>
-                </div>
-
-                <!-- Slide 3: Sample Data - Customers & Orders -->
-                <div class="slide">
-                    <h1>Sample Data - Part 2</h1>
-                    
-                    <h2>Insert Customers:</h2>
-                    <div class="code-wrapper">
-                        <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                        <div class="sql-code">INSERT INTO customers (customer_id, customer_name, city) VALUES
-(101, 'Acme Corporation', 'New York'),
-(102, 'Global Industries', 'Los Angeles'),
-(103, 'Tech Solutions Inc', 'San Francisco'),
-(104, 'Blue Ocean Retail', 'Chicago'),
-(105, 'Prime Distributors', 'Houston'),
-(106, 'Metro Supplies', 'Phoenix'),
-(107, 'Elite Enterprises', 'Philadelphia'),
-(108, 'Smart Systems', 'San Antonio');</div>
-                    </div>
-
-                    <h2>Insert Orders:</h2>
-                    <div class="code-wrapper">
-                        <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                        <div class="sql-code">INSERT INTO orders (order_id, customer_id, order_date, total_amount) VALUES
-(1001, 101, '2024-01-15', 15000.00),
-(1002, 102, '2024-01-18', 8500.00),
-(1003, 101, '2024-02-05', 22000.00),
-(1004, 103, '2024-02-12', 12000.00),
-(1005, 104, '2024-02-20', 9500.00),
-(1006, 102, '2024-03-08', 18000.00),
-(1007, 101, '2024-03-15', 27000.00),
-(1008, 105, '2024-03-22', 14500.00),
-(1009, 103, '2024-04-10', 11000.00),
-(1010, 104, '2024-04-18', 16500.00),
-(1011, 106, '2024-05-05', 7800.00),
-(1012, 101, '2024-05-12', 31000.00),
-(1013, 102, '2024-05-20', 13500.00),
-(1014, 107, '2024-06-08', 9200.00),
-(1015, 103, '2024-06-15', 19000.00);</div>
-                    </div>
-                </div>
-
-                <!-- Slide 4: Question 1 -->
-                <div class="slide">
-                    <h1>Question 1: Basic Subquery</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find all employees who earn more than the average salary.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT employee_id, name, salary
-FROM employees
-WHERE salary > (SELECT AVG(salary) FROM employees);</div>
-                        </div>
-                    </div>
-                    
-                    <h3>Expected Output: (CORRECTED)</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>employee_id</th>
-                                <th>name</th>
-                                <th>salary</th>
-                            </tr>
-                        </thead>
+        <div class="page bg-white shadow-xl">
+            <h1 class="text-4xl font-bold text-teal-700 mb-6 rounded-lg p-2 bg-teal-50">
+                SQL Practice Setup: Subqueries
+            </h1>
+            <p class="text-xl font-medium mb-4 text-gray-700">
+                The following solved questions use a single master table: <strong class="text-teal-600">employees</strong>.
+            </p>
+            
+            <div class="two-column-layout">
+                <div class="main-content" style="flex: 1.5; min-width: 250px;">
+                    <p class="text-xl font-medium mb-2 text-teal-700">employees Table</p>
+                    <table class="data-table">
+                        <thead><tr><th>emp_id</th><th>emp_name</th><th>salary</th><th>department</th></tr></thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>John Smith</td>
-                                <td>85000.00</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Sarah Johnson</td>
-                                <td>95000.00</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Emily Brown</td>
-                                <td>88000.00</td>
-                            </tr>
-                            <tr>
-                                <td>7</td>
-                                <td>James Taylor</td>
-                                <td>92000.00</td>
-                            </tr>
-                            <tr>
-                                <td>9</td>
-                                <td>Robert Garcia</td>
-                                <td>78000.00</td>
-                            </tr>
-                            <tr>
-                                <td>11</td>
-                                <td>William Rodriguez</td>
-                                <td>97000.00</td>
-                            </tr>
-                            <tr>
-                                <td>13</td>
-                                <td>Christopher Lopez</td>
-                                <td>82000.00</td>
-                            </tr>
+                            <tr><td>1</td><td>Amit</td><td>50000</td><td>HR</td></tr>
+                            <tr><td>2</td><td>Neha</td><td>65000</td><td>Finance</td></tr>
+                            <tr><td>3</td><td>Rohan</td><td>40000</td><td>IT</td></tr>
+                            <tr><td>4</td><td>Mehul</td><td>65000</td><td>Finance</td></tr>
+                            <tr><td>5</td><td>Karan</td><td>30000</td><td>IT</td></tr>
                         </tbody>
                     </table>
                 </div>
+                <aside class="aside-content" style="position: static; flex: 3; max-width: 600px;">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">SQL Creation Script</h3>
+                    <div class="code-container" style="min-height: 250px;">
+                        <button class="copy-btn" onclick="copyCode(this)" data-code-target="code-create-employees">Copy Code</button>
+                        <pre><code id="code-create-employees">CREATE TABLE employees (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(50),
+    salary INT,
+    department VARCHAR(50)
+);
 
-                <!-- Slide 5: Question 2 -->
-                <div class="slide">
-                    <h1>Question 2: Subquery with IN</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find all employees who work in departments located in 'New York' or 'London'.
+INSERT INTO employees VALUES
+(1, 'Amit', 50000, 'HR'),
+(2, 'Neha', 65000, 'Finance'),
+(3, 'Rohan', 40000, 'IT'),
+(4, 'Mehul', 65000, 'Finance'),
+(5, 'Karan', 30000, 'IT');</code></pre>
                     </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT employee_id, name, department_id
-FROM employees
-WHERE department_id IN (
-    SELECT department_id 
-    FROM departments 
-    WHERE location IN ('New York', 'London')
-);</div>
-                        </div>
+                </aside>
+            </div>
+        </div>
+        
+        <div class="page bg-teal-50">
+            <h1 class="text-4xl font-black text-teal-800 mb-2">SQL Practice: Scalar Subqueries (4 Questions)</h1>
+            <p class="text-xl font-medium mb-6 text-gray-700">These queries use subqueries to calculate a single value (a scalar) that is then used in the outer query's WHERE clause.</p>
+        </div>
+
+
+        <div class="page bg-gray-50">
+            <h2 class="text-3xl font-bold text-teal-600 mb-6">Q1: Employees Earning More Than Average Salary</h2>
+            <div class="two-column-layout">
+                <div class="main-content">
+                    <p class="text-gray-700 mb-4">
+                        <strong>Goal:</strong> Find the <code>emp_name</code> and <code>salary</code> of employees earning more than the overall company average salary.
+                    </p>
+                    <div class="step-explanation">
+                        <p class="font-bold">Solution using a Scalar Subquery:</p>
+                        <ol class="list-decimal list-inside ml-2">
+                            <li>The <strong>inner query</strong> calculates the single, overall average salary (50000).</li>
+                            <li>The <strong>outer query</strong> then filters the employees where their salary is greater than the value returned by the subquery.</li>
+                        </ol>
                     </div>
-                    
-                    <h3>Expected Output:</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>employee_id</th>
-                                <th>name</th>
-                                <th>department_id</th>
-                            </tr>
-                        </thead>
+                    <p class="text-xl font-medium mb-2 mt-6 text-teal-700">Result Table</p>
+                    <table class="data-table max-w-sm">
+                        <thead><tr><th>emp_name</th><th>salary</th></tr></thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>John Smith</td>
-                                <td>1</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Mike Wilson</td>
-                                <td>1</td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td>David Lee</td>
-                                <td>3</td>
-                            </tr>
-                            <tr>
-                                <td>6</td>
-                                <td>Lisa Anderson</td>
-                                <td>1</td>
-                            </tr>
-                            <tr>
-                                <td>9</td>
-                                <td>Robert Garcia</td>
-                                <td>5</td>
-                            </tr>
-                            <tr>
-                                <td>10</td>
-                                <td>Jennifer Davis</td>
-                                <td>3</td>
-                            </tr>
-                            <tr>
-                                <td>12</td>
-                                <td>Patricia Hernandez</td>
-                                <td>1</td>
-                            </tr>
-                            <tr>
-                                <td>15</td>
-                                <td>Daniel Wilson</td>
-                                <td>5</td>
-                            </tr>
+                            <tr><td>Neha</td><td>65000</td></tr>
+                            <tr><td>Mehul</td><td>65000</td></tr>
                         </tbody>
                     </table>
+                    <p class="text-xs text-gray-500 mt-2">
+                        *Calculation: Overall Average Salary is 50000.*
+                    </p>
                 </div>
-
-                <!-- Slide 6: Question 3 -->
-                <div class="slide">
-                    <h1>Question 3: Correlated Subquery</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find employees whose salary is higher than the average salary in their own department.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT employee_id, name, department_id, salary
-FROM employees e1
+                <aside class="aside-content">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-3">SQL Code (Scalar Subquery)</h3>
+                    <div class="code-container">
+                        <button class="copy-btn" onclick="copyCode(this)" data-code-target="code-q1">Copy Code</button>
+                        <pre><code id="code-q1">SELECT emp_name, salary
+FROM employees
 WHERE salary > (
     SELECT AVG(salary)
-    FROM employees e2
-    WHERE e2.department_id = e1.department_id
-);</div>
-                        </div>
-                    </div>
-                    
-                    <h3>Expected Output: (CORRECTED)</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>employee_id</th>
-                                <th>name</th>
-                                <th>department_id</th>
-                                <th>salary</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>John Smith</td>
-                                <td>1</td>
-                                <td>85000.00</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Sarah Johnson</td>
-                                <td>2</td>
-                                <td>95000.00</td>
-                            </tr>
-                            <tr>
-                                <td>9</td>
-                                <td>Robert Garcia</td>
-                                <td>5</td>
-                                <td>78000.00</td>
-                            </tr>
-                            <tr>
-                                <td>10</td>
-                                <td>Jennifer Davis</td>
-                                <td>3</td>
-                                <td>72000.00</td>
-                            </tr>
-                            <tr>
-                                <td>11</td>
-                                <td>William Rodriguez</td>
-                                <td>2</td>
-                                <td>97000.00</td>
-                            </tr>
-                            <tr>
-                                <td>14</td>
-                                <td>Linda Gonzalez</td>
-                                <td>4</td>
-                                <td>68000.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Slide 7: Question 4 -->
-                <div class="slide">
-                    <h1>Question 4: Subquery in SELECT</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Display each customer's name, total number of orders, and total amount spent.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT 
-    c.customer_name,
-    (SELECT COUNT(*) 
-     FROM orders o 
-     WHERE o.customer_id = c.customer_id) AS total_orders,
-    (SELECT COALESCE(SUM(total_amount), 0) 
-     FROM orders o 
-     WHERE o.customer_id = c.customer_id) AS total_spent
-FROM customers c;</div>
-                        </div>
-                    </div>
-                    
-                    <h3>Expected Output:</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>customer_name</th>
-                                <th>total_orders</th>
-                                <th>total_spent</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Acme Corporation</td>
-                                <td>4</td>
-                                <td>95000.00</td>
-                            </tr>
-                            <tr>
-                                <td>Global Industries</td>
-                                <td>3</td>
-                                <td>40000.00</td>
-                            </tr>
-                            <tr>
-                                <td>Tech Solutions Inc</td>
-                                <td>3</td>
-                                <td>42000.00</td>
-                            </tr>
-                            <tr>
-                                <td>Blue Ocean Retail</td>
-                                <td>2</td>
-                                <td>26000.00</td>
-                            </tr>
-                            <tr>
-                                <td>Prime Distributors</td>
-                                <td>1</td>
-                                <td>14500.00</td>
-                            </tr>
-                            <tr>
-                                <td>Metro Supplies</td>
-                                <td>1</td>
-                                <td>7800.00</td>
-                            </tr>
-                            <tr>
-                                <td>Elite Enterprises</td>
-                                <td>1</td>
-                                <td>9200.00</td>
-                            </tr>
-                            <tr>
-                                <td>Smart Systems</td>
-                                <td>0</td>
-                                <td>0.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Slide 8: Question 5 -->
-                <div class="slide">
-                    <h1>Question 5: Nested Subquery</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find employees who earn more than all employees in the 'Sales' department.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT employee_id, name, salary, department_id
-FROM employees
-WHERE salary > (
-    SELECT MAX(salary)
     FROM employees
-    WHERE department_id = (
-        SELECT department_id 
-        FROM departments 
-        WHERE department_name = 'Sales'
-    )
-);</div>
-                        </div>
+);</code></pre>
                     </div>
-                    
-                    <h3>Expected Output:</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>employee_id</th>
-                                <th>name</th>
-                                <th>salary</th>
-                                <th>department_id</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2</td>
-                                <td>Sarah Johnson</td>
-                                <td>95000.00</td>
-                                <td>2</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Emily Brown</td>
-                                <td>88000.00</td>
-                                <td>2</td>
-                            </tr>
-                            <tr>
-                                <td>7</td>
-                                <td>James Taylor</td>
-                                <td>92000.00</td>
-                                <td>2</td>
-                            </tr>
-                            <tr>
-                                <td>11</td>
-                                <td>William Rodriguez</td>
-                                <td>97000.00</td>
-                                <td>2</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Slide 9: Question 6 -->
-                <div class="slide">
-                    <h1>Question 6: Subquery in FROM</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find departments that have more than 3 employees.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT d.department_id, d.department_name, emp_counts.employee_count
-FROM departments d
-INNER JOIN (
-    SELECT department_id, COUNT(employee_id) AS employee_count
-    FROM employees
-    GROUP BY department_id
-    HAVING COUNT(employee_id) > 3
-) AS emp_counts ON d.department_id = emp_counts.department_id;</div>
-                        </div>
-                    </div>
-                    
-                    <h3>Expected Output:</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>department_id</th>
-                                <th>department_name</th>
-                                <th>employee_count</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2</td>
-                                <td>Engineering</td>
-                                <td>4</td>
-                            </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>Sales</td>
-                                <td>4</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Slide 10: Question 7 -->
-                <div class="slide">
-                    <h1>Question 7: Correlated Subquery with NOT EXISTS</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find the departments where *no* employee earns a salary over $100,000.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT department_id, department_name, location
-FROM departments d
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM employees e
-    WHERE e.department_id = d.department_id
-    AND e.salary > 100000.00
-);</div>
-                        </div>
-                    </div>
-                    
-                    <h3>Expected Output:</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>department_id</th>
-                                <th>department_name</th>
-                                <th>location</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Sales</td>
-                                <td>New York</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Marketing</td>
-                                <td>New York</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>HR</td>
-                                <td>Chicago</td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td>Finance</td>
-                                <td>London</td>
-                            </tr>
-                            <tr>
-                                <td>6</td>
-                                <td>IT</td>
-                                <td>San Francisco</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Slide 11: Question 8 -->
-                <div class="slide">
-                    <h1>Question 8: Subquery with ALL</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find employees who earn more than ALL employees in the 'HR' department.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT employee_id, name, salary
-FROM employees
-WHERE salary > ALL (
-    SELECT salary 
-    FROM employees 
-    WHERE department_id = (
-        SELECT department_id 
-        FROM departments 
-        WHERE department_name = 'HR'
-    )
-);</div>
-                        </div>
-                    </div>
-                    
-                    <h3>Expected Output:</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>employee_id</th>
-                                <th>name</th>
-                                <th>salary</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>John Smith</td>
-                                <td>85000.00</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Sarah Johnson</td>
-                                <td>95000.00</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Emily Brown</td>
-                                <td>88000.00</td>
-                            </tr>
-                            <tr>
-                                <td>7</td>
-                                <td>James Taylor</td>
-                                <td>92000.00</td>
-                            </tr>
-                            <tr>
-                                <td>9</td>
-                                <td>Robert Garcia</td>
-                                <td>78000.00</td>
-                            </tr>
-                            <tr>
-                                <td>10</td>
-                                <td>Jennifer Davis</td>
-                                <td>72000.00</td>
-                            </tr>
-                            <tr>
-                                <td>11</td>
-                                <td>William Rodriguez</td>
-                                <td>97000.00</td>
-                            </tr>
-                            <tr>
-                                <td>13</td>
-                                <td>Christopher Lopez</td>
-                                <td>82000.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Slide 12: Question 9 -->
-                <div class="slide">
-                    <h1>Question 9: Scalar Subquery in WHERE</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find all orders placed before the earliest order made by customer 'Tech Solutions Inc'.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT order_id, customer_id, order_date, total_amount
-FROM orders
-WHERE order_date < (
-    SELECT MIN(order_date)
-    FROM orders
-    WHERE customer_id = (
-        SELECT customer_id 
-        FROM customers 
-        WHERE customer_name = 'Tech Solutions Inc'
-    )
-);</div>
-                        </div>
-                    </div>
-                    
-                    <h3>Expected Output:</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>order_id</th>
-                                <th>customer_id</th>
-                                <th>order_date</th>
-                                <th>total_amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1001</td>
-                                <td>101</td>
-                                <td>2024-01-15</td>
-                                <td>15000.00</td>
-                            </tr>
-                            <tr>
-                                <td>1002</td>
-                                <td>102</td>
-                                <td>2024-01-18</td>
-                                <td>8500.00</td>
-                            </tr>
-                            <tr>
-                                <td>1003</td>
-                                <td>101</td>
-                                <td>2024-02-05</td>
-                                <td>22000.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Slide 13: Question 10 -->
-                <div class="slide">
-                    <h1>Question 10: Subquery with GROUP BY/HAVING</h1>
-                    
-                    <div class="question-box">
-                        <strong>Question:</strong> Find the cities where the total order amount exceeds the overall average order amount across all cities.
-                    </div>
-                    
-                    <div class="solution-box">
-                        <h3>Solution:</h3>
-                        <div class="code-wrapper">
-                            <button class="copy-button" onclick="copyCode(this)">📋 Copy</button>
-                            <div class="sql-code">SELECT c.city, SUM(o.total_amount) AS total_amount
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-GROUP BY c.city
-HAVING SUM(o.total_amount) > (
-    SELECT AVG(total_amount) 
-    FROM orders
-);</div>
-                        </div>
-                    </div>
-                    
-                    <h3>Expected Output:</h3>
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>city</th>
-                                <th>total_amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>New York</td>
-                                <td>95000.00</td>
-                            </tr>
-                            <tr>
-                                <td>Los Angeles</td>
-                                <td>40000.00</td>
-                            </tr>
-                            <tr>
-                                <td>San Francisco</td>
-                                <td>42000.00</td>
-                            </tr>
-                            <tr>
-                                <td>Chicago</td>
-                                <td>26000.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Slide 14: Conclusion -->
-                <div class="slide">
-                    <h1>End of Practice</h1>
-                    <h2>Summary of Subquery Types</h2>
-                    <ul>
-                        <li>**Scalar Subqueries:** Return a single value (e.g., Q1, Q5, Q9).</li>
-                        <li>**Multi-row Subqueries:** Return a list of values (e.g., Q2, Q8).</li>
-                        <li>**Correlated Subqueries:** Execute once for every row of the outer query (e.g., Q3, Q7).</li>
-                        <li>**Subqueries in FROM:** Used as a derived table (e.g., Q6).</li>
-                        <li>**Subqueries in SELECT:** Used to calculate aggregate values for each row (e.g., Q4).</li>
-                    </ul>
-                    <p style="margin-top: 30px; font-size: 1.1em; color: #444;">Practice makes perfect! Try modifying the queries or the data to explore different outcomes.</p>
-                </div>
-
+                </aside>
             </div>
         </div>
 
-        <!-- Navigation Buttons -->
-        <button id="prevButton" class="nav-button prev-button" disabled onclick="changeSlide(-1)">&#10094;</button>
-        <button id="nextButton" class="nav-button next-button" onclick="changeSlide(1)">&#10095;</button>
+        <div class="page bg-white">
+            <h2 class="text-3xl font-bold text-teal-600 mb-6">Q2: Employees Working in Same Department as Neha</h2>
+            <div class="two-column-layout">
+                <div class="main-content">
+                    <p class="text-gray-700 mb-4">
+                        <strong>Goal:</strong> Find employees who share the same department as 'Neha', without hardcoding the department name.
+                    </p>
+                    <div class="step-explanation">
+                        <p class="font-bold">Solution using a Scalar Subquery:</p>
+                        <ol class="list-decimal list-inside ml-2">
+                            <li>The <strong>inner query</strong> finds the single department name ('Finance') associated with 'Neha'.</li>
+                            <li>The <strong>outer query</strong> filters employees where their <code>department</code> equals the department name returned by the subquery.</li>
+                        </ol>
+                    </div>
+                    <p class="text-xl font-medium mb-2 mt-6 text-teal-700">Result Table</p>
+                    <table class="data-table max-w-sm">
+                        <thead><tr><th>emp_name</th><th>department</th></tr></thead>
+                        <tbody>
+                            <tr><td>Neha</td><td>Finance</td></tr>
+                            <tr><td>Mehul</td><td>Finance</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <aside class="aside-content">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-3">SQL Code (Scalar Subquery)</h3>
+                    <div class="code-container">
+                        <button class="copy-btn" onclick="copyCode(this)" data-code-target="code-q2">Copy Code</button>
+                        <pre><code id="code-q2">SELECT emp_name, department
+FROM employees
+WHERE department = (
+    SELECT department
+    FROM employees
+    WHERE emp_name = 'Neha'
+);</code></pre>
+                    </div>
+                </aside>
+            </div>
+        </div>
 
-        <!-- Progress Dots -->
-        <div class="progress-indicator" id="progressIndicator"></div>
+        <div class="page bg-gray-50">
+            <h2 class="text-3xl font-bold text-teal-600 mb-6">Q3: Employees Having the Highest Salary</h2>
+            <div class="two-column-layout">
+                <div class="main-content">
+                    <p class="text-gray-700 mb-4">
+                        <strong>Goal:</strong> Find the <code>emp_name</code> and <code>salary</code> of employees who match the maximum salary in the table.
+                    </p>
+                    <div class="step-explanation">
+                        <p class="font-bold">Solution using a Scalar Subquery:</p>
+                        <ol class="list-decimal list-inside ml-2">
+                            <li>The <strong>inner query</strong> calculates the single maximum salary (65000) from the entire <code>employees</code> table.</li>
+                            <li>The <strong>outer query</strong> filters employees where their salary is exactly equal to the maximum salary calculated by the subquery.</li>
+                        </ol>
+                    </div>
+                    <p class="text-xl font-medium mb-2 mt-6 text-teal-700">Result Table</p>
+                    <table class="data-table max-w-lg">
+                        <thead><tr><th>emp_name</th><th>salary</th></tr></thead>
+                        <tbody>
+                            <tr><td>Neha</td><td>65000</td></tr>
+                            <tr><td>Mehul</td><td>65000</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <aside class="aside-content">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-3">SQL Code (Scalar Subquery)</h3>
+                    <div class="code-container">
+                        <button class="copy-btn" onclick="copyCode(this)" data-code-target="code-q3">Copy Code</button>
+                        <pre><code id="code-q3">SELECT emp_name, salary
+FROM employees
+WHERE salary = (
+    SELECT MAX(salary)
+    FROM employees
+);</code></pre>
+                    </div>
+                </aside>
+            </div>
+        </div>
+        
+        <div class="page bg-white">
+            <h2 class="text-3xl font-bold text-teal-600 mb-6">Q4: Employees Earning Less Than Amit</h2>
+            <div class="two-column-layout">
+                <div class="main-content">
+                    <p class="text-gray-700 mb-4">
+                        <strong>Goal:</strong> Find the <code>emp_name</code> and <code>salary</code> of employees whose salary is less than 'Amit's salary, without knowing Amit's salary beforehand.
+                    </p>
+                    <div class="step-explanation">
+                        <p class="font-bold">Solution using a Scalar Subquery:</p>
+                        <ol class="list-decimal list-inside ml-2">
+                            <li>The <strong>inner query</strong> fetches the single salary value (50000) for the employee named 'Amit'.</li>
+                            <li>The <strong>outer query</strong> then filters all employees where their <code>salary</code> is less than the specific salary returned by the subquery.</li>
+                        </ol>
+                    </div>
+                    <p class="text-xl font-medium mb-2 mt-6 text-teal-700">Result Table</p>
+                    <table class="data-table max-w-lg">
+                        <thead><tr><th>emp_name</th><th>salary</th></tr></thead>
+                        <tbody>
+                            <tr><td>Rohan</td><td>40000</td></tr>
+                            <tr><td>Karan</td><td>30000</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <aside class="aside-content">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-3">SQL Code (Scalar Subquery)</h3>
+                    <div class="code-container">
+                        <button class="copy-btn" onclick="copyCode(this)" data-code-target="code-q4">Copy Code</button>
+                        <pre><code id="code-q4">SELECT emp_name, salary
+FROM employees
+WHERE salary < (
+    SELECT salary
+    FROM employees
+    WHERE emp_name = 'Amit'
+);</code></pre>
+                    </div>
+                </aside>
+            </div>
+        </div>
 
     </div>
 
+    <button id="prev-btn" class="nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+    </button>
+    <button id="next-btn" class="nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+        </svg>
+    </button>
+
     <script>
-        let currentSlide = 0;
-        const slidesContainer = document.getElementById('slidesContainer');
-        const slides = document.querySelectorAll('.slide');
-        const totalSlides = slides.length;
-        const prevButton = document.getElementById('prevButton');
-        const nextButton = document.getElementById('nextButton');
-        const progressIndicator = document.getElementById('progressIndicator');
+        const contentWrapper = document.getElementById('content-wrapper');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pages = document.querySelectorAll('.page');
+        const totalPages = 6;
+        let currentPage = 0;
 
-        // Setup progress dots
-        for (let i = 0; i < totalSlides; i++) {
-            const dot = document.createElement('span');
-            dot.classList.add('progress-dot');
-            dot.setAttribute('onclick', `goToSlide(${i})`);
-            progressIndicator.appendChild(dot);
-        }
-        const dots = document.querySelectorAll('.progress-dot');
-
-        function updateSlide() {
-            slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
-            
-            // Update buttons
-            prevButton.disabled = currentSlide === 0;
-            nextButton.disabled = currentSlide === totalSlides - 1;
-
-            // Update dots
-            dots.forEach((dot, index) => {
-                dot.classList.remove('active');
-                if (index === currentSlide) {
-                    dot.classList.add('active');
-                }
-            });
+        /**
+         * Updates the position of the content wrapper to show the current page.
+         */
+        function updatePagePosition() {
+            // The content wrapper is translated horizontally by the width of the viewport multiplied by the current page index.
+            const offset = currentPage * -100;
+            contentWrapper.style.transform = `translateX(${offset}vw)`;
+            updateButtonState();
+            // Scroll the current page content to the top when navigating
+            pages[currentPage].scrollTop = 0; 
         }
 
-        function changeSlide(direction) {
-            currentSlide += direction;
-            if (currentSlide < 0) currentSlide = 0;
-            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
-            updateSlide();
+        /**
+         * Enables/disables navigation buttons based on the current page index.
+         */
+        function updateButtonState() {
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = currentPage === totalPages - 1;
         }
 
-        function goToSlide(index) {
-            currentSlide = index;
-            updateSlide();
-        }
-
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') changeSlide(-1);
-            if (e.key === 'ArrowRight') changeSlide(1);
+        // Event listener for the Previous button
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePagePosition();
+            }
         });
 
-        // Copy code functionality
-        function copyCode(button) {
-            const codeWrapper = button.parentElement;
-            const codeBlock = codeWrapper.querySelector('.sql-code');
-            const code = codeBlock.textContent;
-            
-            // Use execCommand('copy') for better compatibility in iFrames
-            const textarea = document.createElement('textarea');
-            textarea.value = code;
-            document.body.appendChild(textarea);
-            textarea.select();
-            
+        // Event listener for the Next button
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                updatePagePosition();
+            }
+        });
+
+        // Initialize the page on load
+        window.onload = () => {
+            // Ensure the initial position and button state are set
+            updatePagePosition();
+        };
+
+        // Handle window resize to re-apply the position based on the new viewport width
+        window.addEventListener('resize', updatePagePosition);
+
+
+        /**
+         * Copies the content of the target code block to the clipboard.
+         * @param {HTMLElement} buttonElement - The button element that was clicked.
+         */
+        async function copyCode(buttonElement) {
+            const codeBlockId = buttonElement.getAttribute('data-code-target');
+            const codeElement = document.getElementById(codeBlockId);
+            const codeText = codeElement.innerText;
+
             try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    const originalText = button.innerHTML;
-                    button.innerHTML = '✓ Copied!';
-                    button.classList.add('copied');
-                    
-                    setTimeout(() => {
-                        button.innerHTML = originalText;
-                        button.classList.remove('copied');
-                    }, 2000);
-                } else {
-                    throw new Error('Fallback copy failed');
-                }
-            } catch (err) {
-                console.error('Failed to copy:', err);
-                button.innerHTML = '✗ Failed';
+                // Use the modern clipboard API
+                await navigator.clipboard.writeText(codeText);
+                
+                // Temporary success feedback
+                buttonElement.textContent = 'Copied!';
                 setTimeout(() => {
-                    button.innerHTML = '📋 Copy';
-                }, 2000);
-            } finally {
-                document.body.removeChild(textarea);
+                    buttonElement.textContent = 'Copy Code';
+                }, 1500);
+
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                buttonElement.textContent = 'Error!';
+                setTimeout(() => {
+                    buttonElement.textContent = 'Copy Code';
+                }, 1500);
             }
         }
-
-        // Initialize
-        updateSlide();
     </script>
 </body>
 </html>
